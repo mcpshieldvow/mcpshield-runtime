@@ -34,6 +34,42 @@ New here? Jump to the [Quickstart](#quickstart) — it wraps a real MCP server a
 - Rust 1.80+ (`rustup update stable`)
 - An MCP server binary you want to sandbox
 
+### Connect a server to the MCPShield console (CLI)
+
+The fastest path: install the `mcpshield-runtime` CLI, register a server in the
+[console](https://mcpshield.shieldvow.com) to get a server id + token, and prefix
+your MCP server command with `mcpshield-runtime --`.
+
+```bash
+# Install from a published release (prebuilt binaries attached to each tag)…
+cargo install --git https://github.com/mcpshieldvow/mcpshield-runtime --tag v0.1.1 mcpshield-runtime
+# …or download a prebuilt archive from the Releases page and put it on your PATH.
+```
+
+```bash
+MCPSHIELD_API_URL=https://mcp-api.shieldvow.com \
+MCPSHIELD_SERVER_ID=<your-server-id> \
+MCPSHIELD_TOKEN=<your-runtime-token> \
+mcpshield-runtime -- <your-mcp-server-command> [args...]
+```
+
+The CLI spawns your MCP server and faithfully proxies its stdio (the JSON-RPC
+protocol is passed through untouched). In parallel it inspects every
+`tools/call` for outbound hosts and sensitive data (DLP) and streams detection
+events to the console, where they appear after the first outbound call.
+
+> **Monitor mode.** The CLI never blocks requests, so wrapping a server never
+> changes its behaviour — it only adds visibility. Use the library API below
+> when you want to *enforce* a capability allowlist and outbound filter.
+
+| Variable | Required | Description |
+|---|---|---|
+| `MCPSHIELD_API_URL` | yes | Console API base URL |
+| `MCPSHIELD_SERVER_ID` | yes | Registered server id |
+| `MCPSHIELD_TOKEN` | yes | Per-server runtime token (rotatable in the console) |
+| `MCPSHIELD_SERVER_CLASS` | no | Server class label (default `other`) |
+| `MCPSHIELD_LOG` | no | Log filter, e.g. `debug` (default `info`; logs go to stderr) |
+
 ### Add to your workspace
 
 ```toml
